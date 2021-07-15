@@ -24,7 +24,7 @@ namespace EncomposApi.Client
             var normalizedEmail = NormalizeEmail(email);
 
             var body = new 
-            { 
+            {
                 email,
                 otherEmails = email != normalizedEmail ? new[] { normalizedEmail } : null, 
                 firstName, 
@@ -81,10 +81,6 @@ namespace EncomposApi.Client
                 localPart = Regex.Replace(localPart, "\\+.*", ""); 
                 email = localPart + "@gmail.com";
             }
-
-            // handle known substitutions
-            // const mapped = emailMap.get(email);
-            // if (mapped) return mapped;
 
             return email;
         }
