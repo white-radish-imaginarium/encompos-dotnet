@@ -1,12 +1,12 @@
 ﻿namespace EncomposApi
 {
-    public class PurchaseOrderQuery
+    public record PurchaseOrderQuery
     {
-        public int? PageSize { get; set; }
-        public decimal? BeforePoNumber { get; set; }
+        public int? PageSize { get; init; }
+        public decimal? BeforePoNumber { get; init; }
 
-        public decimal[] PoNumbers { get; set; }
+        public decimal[] PoNumbers { get; init; }
 
-        public bool IncludeLines { get; set; }
+        public bool IncludeLines { get; init; }
     }
 }
