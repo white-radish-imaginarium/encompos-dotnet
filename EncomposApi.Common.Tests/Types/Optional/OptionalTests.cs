@@ -1,9 +1,9 @@
-﻿using EncomposApi.Tests;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
 using Xunit;
+using EncomposApi.Common.Tests;
 
 namespace EncomposApi.Types.Optional.Tests
 {

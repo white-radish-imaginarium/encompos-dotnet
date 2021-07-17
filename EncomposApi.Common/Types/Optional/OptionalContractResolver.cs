@@ -1,16 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Reflection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System.Reflection;
 
 namespace EncomposApi.Types.Optional
 {
     public class OptionalContractResolver : DefaultContractResolver
 	{
-		public static readonly OptionalContractResolver Instance = new()
-		{
-			NamingStrategy = new CamelCaseNamingStrategy()
-		};
-
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
@@ -31,5 +26,4 @@ namespace EncomposApi.Types.Optional
 			return property;
 		}
 	}
-
 }

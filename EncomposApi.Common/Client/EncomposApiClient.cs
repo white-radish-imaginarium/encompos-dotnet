@@ -4,12 +4,16 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace EncomposApi.Client
 {
     public class EncomposApiClient
     {
+        private readonly static Lazy<JsonSerializer> _lazyJsonSerializer = new(() =>
+            JsonUtilities.CreateSerializer());
+
         private readonly HttpClient _httpClient;
 
         public EncomposApiClient(IHttpClientFactory httpClientFactory)
@@ -40,6 +44,16 @@ namespace EncomposApi.Client
                 return await response.Content.ReadAsJObjectAsync();
             }
             throw await EncomposApiClientException.CreateAsync(response);
+        }
+
+        public T Deserialize<T>(JToken token)
+        {
+            return token.ToObject<T>(_lazyJsonSerializer.Value);
+        }
+
+        public JToken Serialize<T>(T obj)
+        {
+            return JToken.FromObject(obj, _lazyJsonSerializer.Value);
         }
 
         public async Task<JObject> GetCustomerAsync(string email)
