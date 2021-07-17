@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -9,16 +8,29 @@ using Newtonsoft.Json.Linq;
 
 namespace EncomposApi.Client
 {
+    // TODO: add cancellation tokens
     public class EncomposApiClient
     {
-        private readonly static Lazy<JsonSerializer> _lazyJsonSerializer = new(() =>
-            JsonUtilities.CreateSerializer());
+        private readonly static Lazy<JsonSerializer> _serializer = 
+            new(() => JsonUtilities.CreateSerializer());
+
+        private static JsonSerializer Serializer => _serializer.Value;
 
         private readonly HttpClient _httpClient;
 
         public EncomposApiClient(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("encompos");
+        }
+
+        public T Deserialize<T>(JToken token)
+        {
+            return token.ToObject<T>(Serializer);
+        }
+
+        public JToken Serialize<T>(T obj)
+        {
+            return JToken.FromObject(obj, Serializer);
         }
 
         public async Task<JObject> GetOrCreateCustomerAsync(
@@ -38,22 +50,14 @@ namespace EncomposApi.Client
             };
 
             var requestUri = $"/api/customers/get-or-create";
-            using var response = await _httpClient.PutAsJsonAsync(requestUri, body);
+            using var content = Serializer.CreateHttpContent(body);
+            using var response = await _httpClient.PutAsync(requestUri, content);
+            // if (response.IsSuccessStatusCode)
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJObjectAsync();
             }
             throw await EncomposApiClientException.CreateAsync(response);
-        }
-
-        public T Deserialize<T>(JToken token)
-        {
-            return token.ToObject<T>(_lazyJsonSerializer.Value);
-        }
-
-        public JToken Serialize<T>(T obj)
-        {
-            return JToken.FromObject(obj, _lazyJsonSerializer.Value);
         }
 
         public async Task<JObject> GetCustomerAsync(string email)
@@ -102,7 +106,8 @@ namespace EncomposApi.Client
         public async Task<JArray> QueryCustomersAsync(CustomerQuery query)
         {
             var requestUri = $"/api/customers/query";
-            using var response = await _httpClient.PostAsJsonAsync(requestUri, query);
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJArrayAsync();
@@ -133,8 +138,8 @@ namespace EncomposApi.Client
         private async Task<JArray> QueryInventoryOnceAsync(InventoryQuery query)
         {
             var requestUri = $"/api/inventory/query";
-            using var response = await _httpClient.PostAsJsonAsync(requestUri, query);
-            // var response = await _httpClient.PostAsJsonAsync(requestUri, query);
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJArrayAsync();
@@ -145,7 +150,8 @@ namespace EncomposApi.Client
         public async Task<JObject> PutInventoryAsync(string productCode, JObject model)
         {
             var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}";
-            using var response = await _httpClient.PutAsJsonAsync(requestUri, model);
+            using var content = Serializer.CreateHttpContent(model);
+            using var response = await _httpClient.PutAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.Created)
             {
                 return await response.Content.ReadAsJObjectAsync();
@@ -156,7 +162,8 @@ namespace EncomposApi.Client
         public async Task<JArray> QueryPurchaseOrdersAsync(PurchaseOrderQuery query)
         {
             var requestUri = $"/api/po/query";
-            using var response = await _httpClient.PostAsJsonAsync(requestUri, query);
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJArrayAsync();
@@ -167,7 +174,8 @@ namespace EncomposApi.Client
         public async Task<JObject> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
         {
             var requestUri = $"/api/po/{poNumber}/lines";
-            using var response = await _httpClient.PutAsJsonAsync(requestUri, lines);
+            using var content = Serializer.CreateHttpContent(lines);
+            using var response = await _httpClient.PutAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJObjectAsync();
