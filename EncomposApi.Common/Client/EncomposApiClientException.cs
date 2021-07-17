@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EncomposApi.Client
@@ -15,18 +16,18 @@ namespace EncomposApi.Client
 
         public HttpStatusCode StatusCode { get; }
 
-        public static async Task<EncomposApiClientException> CreateAsync(HttpResponseMessage response)
+        public static async Task<EncomposApiClientException> CreateAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
             return response.StatusCode switch
             {
                 HttpStatusCode.ServiceUnavailable => CreateFromMessage(response.StatusCode, response.ReasonPhrase),
-                _ => await CreateFromContentAsync(response)
+                _ => await CreateFromContentAsync(response, cancellationToken)
             };
         }
 
-        private static async Task<EncomposApiClientException> CreateFromContentAsync(HttpResponseMessage response)
+        private static async Task<EncomposApiClientException> CreateFromContentAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
-            string content = await response.Content.ReadAsStringAsync();
+            string content = await response.Content.ReadAsStringAsync(cancellationToken);
             if (string.IsNullOrEmpty(content)) return CreateFromMessage(response.StatusCode);
             try
             {

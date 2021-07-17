@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -8,7 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace EncomposApi.Client
 {
-    // TODO: add cancellation tokens
     public class EncomposApiClient
     {
         private readonly static Lazy<JsonSerializer> _serializer = 
@@ -28,13 +28,12 @@ namespace EncomposApi.Client
             return token.ToObject<T>(Serializer);
         }
 
-        public JToken Serialize<T>(T obj)
-        {
-            return JToken.FromObject(obj, Serializer);
-        }
-
         public async Task<JObject> GetOrCreateCustomerAsync(
-            string email, string firstName, string lastName, string phone, bool? canText)
+            string email, 
+            string firstName, 
+            string lastName, 
+            string phone, 
+            bool? canText)
         {
             email = email?.ToLowerInvariant().Trim();
             var normalizedEmail = NormalizeEmail(email);
@@ -60,11 +59,10 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
-        public async Task<JObject> GetCustomerAsync(string email)
+        public async Task<JObject> GetCustomerAsync(string email, CancellationToken cancellationToken = default)
         {
             // check to see if we have an account using the raw email address first,
             // if the raw email address doesn't match the normalized address.
-
             email = email?.ToLowerInvariant().Trim();
             var normalizedEmail = NormalizeEmail(email);
             var query = new CustomerQuery
@@ -73,7 +71,7 @@ namespace EncomposApi.Client
                     ? new[] { email } 
                     : new[] { email, normalizedEmail }
             };
-            var results = await QueryCustomersAsync(query);
+            var results = await QueryCustomersAsync(query, cancellationToken);
 
             foreach (var result in results)
             {
@@ -103,19 +101,19 @@ namespace EncomposApi.Client
             return email;
         }
 
-        public async Task<JArray> QueryCustomersAsync(CustomerQuery query)
+        public async Task<JArray> QueryCustomersAsync(CustomerQuery query, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/customers/query";
             using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsJArrayAsync();
+                return await response.Content.ReadAsJArrayAsync(cancellationToken);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
-        public async Task<JArray> QueryInventoryAsync(InventoryQuery query)
+        public async Task<JArray> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             JArray results = new();
             int pos = 0, len = query.Codes.Length;
@@ -124,7 +122,7 @@ namespace EncomposApi.Client
             {
                 string[] codes = new string[Math.Min(batchSize, len - pos)];
                 Array.Copy(query.Codes, pos, codes, 0, codes.Length);
-                JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes });
+                JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
                 foreach (JToken token in batch)
                 {
                     results.Add(token);
@@ -135,16 +133,16 @@ namespace EncomposApi.Client
             return results;
         }
 
-        private async Task<JArray> QueryInventoryOnceAsync(InventoryQuery query)
+        private async Task<JArray> QueryInventoryOnceAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/inventory/query";
             using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsJArrayAsync();
+                return await response.Content.ReadAsJArrayAsync(cancellationToken);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<JObject> PutInventoryAsync(string productCode, JObject model)
@@ -159,16 +157,16 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
-        public async Task<JArray> QueryPurchaseOrdersAsync(PurchaseOrderQuery query)
+        public async Task<JArray> QueryPurchaseOrdersAsync(PurchaseOrderQuery query, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/po/query";
             using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsJArrayAsync();
+                return await response.Content.ReadAsJArrayAsync(cancellationToken);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<JObject> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
