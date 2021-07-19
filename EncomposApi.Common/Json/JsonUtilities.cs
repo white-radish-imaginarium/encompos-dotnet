@@ -3,11 +3,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using EncomposApi.Types.Optional;
 
-namespace EncomposApi
+namespace EncomposApi.Json
 {
     public static class JsonUtilities
     {
-        public static JsonSerializerSettings CreateSettings() =>
+        public static JsonSerializerSettings CreateSerializerSettings() =>
             new()
             {
                 ContractResolver = new OptionalContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
@@ -16,6 +16,6 @@ namespace EncomposApi
             };
 
         public static JsonSerializer CreateSerializer() =>
-            JsonSerializer.Create(CreateSettings());
+            JsonSerializer.Create(CreateSerializerSettings());
     }
 }
