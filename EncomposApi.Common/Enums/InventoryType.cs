@@ -1,6 +1,6 @@
 ﻿namespace EncomposApi.Enums
 {
-    public enum ItemType
+    public enum InventoryType
     {
         Standard = 1,
         Service = 2,

@@ -1,7 +1,8 @@
-﻿using EncomposApi.Types.Optional;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using EncomposApi.Enums;
+using EncomposApi.Types.Optional;
 
 namespace EncomposApi.Models
 {
@@ -14,6 +15,7 @@ namespace EncomposApi.Models
         public Optional<string> Description { get; set; }
         public Optional<string> ItemSize { get; set; }
         public Optional<string> Attribute { get; set; }
+        public Optional<InventoryType> InventoryType { get; set; }
 
         public Optional<decimal> RetailPrice { get; set; }
         public Optional<decimal> UnitCost { get; set; }
