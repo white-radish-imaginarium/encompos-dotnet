@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using EncomposApi.Json;
 
 namespace EncomposApi.Common.Tests
 {
@@ -6,7 +7,7 @@ namespace EncomposApi.Common.Tests
     {
         static TestBase()
         {
-            JsonConvert.DefaultSettings = JsonUtilities.CreateSettings;
+            JsonConvert.DefaultSettings = JsonUtilities.CreateSerializerSettings;
         }
     }
 }
