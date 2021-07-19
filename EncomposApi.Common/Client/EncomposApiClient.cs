@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -113,6 +114,13 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
+        public async Task<InventoryResult[]> QueryTypedInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+        {
+            var jarray = await QueryInventoryAsync(query, cancellationToken);
+            var results = jarray.Select(Deserialize<InventoryResult>).ToArray();
+            return results;
+        }
+
         public async Task<JArray> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             JArray results = new();
@@ -123,10 +131,7 @@ namespace EncomposApi.Client
                 string[] codes = new string[Math.Min(batchSize, len - pos)];
                 Array.Copy(query.Codes, pos, codes, 0, codes.Length);
                 JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
-                foreach (JToken token in batch)
-                {
-                    results.Add(token);
-                }
+                results.Merge(batch);
                 pos += batchSize;
             }
 
