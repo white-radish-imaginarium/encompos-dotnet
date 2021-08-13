@@ -6,9 +6,8 @@ using EncomposApi.Types.Optional;
 
 namespace EncomposApi.Models
 {
-    public class InventoryModel //: ILabelingModel, IStockCheckModel
+    public class InventoryModel
     {
-        //public string Type { get; set; } = "inventory";
         [Required]
         public string ProductCode { get; set; }
         public Optional<string> BrandName { get; set; }
