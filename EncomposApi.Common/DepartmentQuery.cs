@@ -1,6 +1,6 @@
 ﻿namespace EncomposApi
 {
-    public record DepartmentsQuery
+    public record DepartmentQuery
     {
         /// <summary>
         /// Nests subdepartments.
@@ -17,7 +17,7 @@
         /// </summary>
         public bool IncludeParents { get; init; }
 
-        public DepartmentsQuery Normalize()
+        public DepartmentQuery Normalize()
         {
             if (Nested && IncludeParents) return this with { IncludeParents = false };
             return this;

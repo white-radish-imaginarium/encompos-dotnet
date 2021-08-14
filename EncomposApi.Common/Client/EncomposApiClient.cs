@@ -115,6 +115,18 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
+        public async Task<JArray> QueryDepartmentsAsync(DepartmentQuery query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/departments/query";
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await response.Content.ReadAsJArrayAsync(cancellationToken);
+            }
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+        }
+
         public async Task<InventoryResult[]> QueryTypedInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             var jarray = await QueryInventoryAsync(query, cancellationToken);
