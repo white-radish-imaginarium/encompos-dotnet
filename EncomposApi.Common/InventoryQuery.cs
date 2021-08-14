@@ -1,4 +1,6 @@
-﻿namespace EncomposApi
+﻿using FluentValidation;
+
+namespace EncomposApi
 {
     public record InventoryQuery
     {
@@ -17,5 +19,13 @@
         public bool IncludeOpenOrders { get; init; }
 
         public bool IncludePromotions { get; init; }
+    }
+
+    public class InventoryQueryValidator : AbstractValidator<InventoryQuery>
+    {
+        public InventoryQueryValidator()
+        {
+            RuleFor(p => p.Codes).Must(codes => codes.Length <= 100).When(p => p.Codes is not null).WithMessage("Too many codes");
+        }
     }
 }

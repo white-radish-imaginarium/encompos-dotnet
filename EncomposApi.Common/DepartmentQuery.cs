@@ -1,4 +1,6 @@
-﻿namespace EncomposApi
+﻿using FluentValidation;
+
+namespace EncomposApi
 {
     public record DepartmentQuery
     {
@@ -16,11 +18,13 @@
         /// Include parent departments. Only honored when Nested = false.
         /// </summary>
         public bool IncludeParents { get; init; }
+    }
 
-        public DepartmentQuery Normalize()
+    public class DepartmentQueryValidator : AbstractValidator<DepartmentQuery>
+    {
+        public DepartmentQueryValidator()
         {
-            if (Nested && IncludeParents) return this with { IncludeParents = false };
-            return this;
+            RuleFor(p => p.IncludeParents).Must(i => !i).When(p => p.Nested).WithMessage("Cannot include parents in a nested result.");
         }
     }
 }

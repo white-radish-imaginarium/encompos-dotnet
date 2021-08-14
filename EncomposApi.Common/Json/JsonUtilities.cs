@@ -10,7 +10,7 @@ namespace EncomposApi.Json
         public static JsonSerializerSettings CreateSerializerSettings() =>
             new()
             {
-                ContractResolver = new OptionalContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
+                ContractResolver = new OptionalContractResolver { NamingStrategy = new CamelCaseNamingStrategy { ProcessDictionaryKeys = true } },
                 Converters = new List<JsonConverter> { new OptionalConverter() },
                 Formatting = Formatting.Indented,
             };
