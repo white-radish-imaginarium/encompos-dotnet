@@ -9,12 +9,15 @@ namespace EncomposApi.Client
 {
     public class EncomposApiClientException : Exception
     {
-        public EncomposApiClientException(HttpStatusCode statusCode, string message) : base(message)
+        public EncomposApiClientException(HttpStatusCode statusCode, string message, object details = null) : base(message)
         {
             StatusCode = statusCode;
+            Details = details;
         }
 
         public HttpStatusCode StatusCode { get; }
+
+        public object Details { get; }
 
         public static async Task<EncomposApiClientException> CreateAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
@@ -42,22 +45,24 @@ namespace EncomposApi.Client
 
         private static EncomposApiClientException CreateFromJson(HttpStatusCode statusCode, JObject body)
         {
-            string message = null;
+            string reason = null;
+            object details = null;
             if (body != null)
             {
-                message = body["reason"]?.ToString();
+                reason = body["reason"]?.ToString();
+                details = body["details"];
             }
 
-            return CreateFromMessage(statusCode, message);
+            return CreateFromMessage(statusCode, reason, details);
         }
 
-        private static EncomposApiClientException CreateFromMessage(HttpStatusCode statusCode, string message = null)
+        private static EncomposApiClientException CreateFromMessage(HttpStatusCode statusCode, string message = null, object details = null)
         {
             if (string.IsNullOrEmpty(message))
             {
                 message = $"{(int)statusCode}";
             }
-            return new EncomposApiClientException(statusCode, message);
+            return new EncomposApiClientException(statusCode, message, details);
         }
 
     }
