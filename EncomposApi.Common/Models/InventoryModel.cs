@@ -35,8 +35,9 @@ namespace EncomposApi.Models
 
         public Optional<decimal> DepartmentId { get; set; }
         public Optional<string> DepartmentName { get; set; }
-        public Optional<bool> IsEbtEligible { get; set; }
+        public Optional<decimal?> ProductGroupId { get; set; }
         public Optional<IList<bool>> Taxes { get; set; }
+        public Optional<bool> Ebt { get; set; }
 
 
         public Optional<decimal?> SupplierId { get; set; }
