@@ -16,6 +16,7 @@ namespace EncomposApi.Models
         public Optional<string> Attribute { get; set; }
         public Optional<InventoryType> InventoryType { get; set; }
 
+        public Optional<decimal?> FixedPrice { get; set; }
         public Optional<decimal> RetailPrice { get; set; }
         public Optional<decimal> UnitCost { get; set; }
         public Optional<decimal> Markup { get; set; }
