@@ -14,6 +14,8 @@ namespace EncomposApi
         /// Include inventory defaults.
         /// </summary>
         public int Length { get; init; }
+
+        public int? MinValue { get; init; }
     }
 
     public class NextAvailableProductCodeQueryValidator : AbstractValidator<NextAvailableProductCodeQuery>
@@ -30,6 +32,8 @@ namespace EncomposApi
                 .Must((model, length) => length > model.Prefix.Length)
                 .When(v => v.Prefix != null)
                 .WithMessage("Length must be longer than the prefix.");
+
+            RuleFor(p => p.MinValue).GreaterThanOrEqualTo(0);
         }
     }
 }
