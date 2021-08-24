@@ -33,6 +33,11 @@ namespace EncomposApi
                 .When(v => v.Prefix != null)
                 .WithMessage("Length must be longer than the prefix.");
 
+            RuleFor(p => p.Length)
+                .Must((model, length) => length - model.Prefix.Length < 5)
+                .When(v => v.Prefix != null)
+                .WithMessage("Suffix length must be less than 5.");
+
             RuleFor(p => p.MinValue).GreaterThanOrEqualTo(0);
         }
     }
