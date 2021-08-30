@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using EncomposApi.Enums;
 using EncomposApi.Types.Optional;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace EncomposApi.Models
 {
@@ -58,5 +60,7 @@ namespace EncomposApi.Models
         /// </summary>
         public Optional<IList<AliasModel>> MoreAliases { get; set; }
 
+        [JsonProperty("_diff")]
+        public Optional<JToken> Diff { get; set; }
     }
 }
