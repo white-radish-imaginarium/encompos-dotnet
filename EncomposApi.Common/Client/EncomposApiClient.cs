@@ -235,5 +235,16 @@ namespace EncomposApi.Client
             }
             throw await EncomposApiClientException.CreateAsync(response);
         }
+
+        public async Task<JObject> DeletePurchaseOrderLineAsync(decimal poNumber, decimal poLineId)
+        {
+            var requestUri = $"/api/po/{poNumber}/lines/{poLineId}";
+            using var response = await _httpClient.DeleteAsync(requestUri);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await response.Content.ReadAsJObjectAsync();
+            }
+            throw await EncomposApiClientException.CreateAsync(response);
+        }
     }
 }

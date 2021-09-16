@@ -17,7 +17,7 @@ namespace EncomposApi.Models
     {
         public AddToPurchaseOrderModelValidator()
         {
-            RuleFor(item => item.SupplierId).ScalePrecision(0, 5);
+            RuleFor(item => item.SupplierId).ScalePrecision(0, 5, ignoreTrailingZeros: true);
             RuleFor(item => item.ItemNumber).MaximumLength(20);
             RuleFor(item => item.ItemNumber).NotEmpty().When(i => string.IsNullOrEmpty(i.ProductCode));
             RuleFor(item => item.ProductCode).MaximumLength(15);
