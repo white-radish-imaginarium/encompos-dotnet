@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using EncomposApi.Json;
+using EncomposApi.Models;
 
 namespace EncomposApi.Client
 {
@@ -215,6 +216,18 @@ namespace EncomposApi.Client
         {
             var requestUri = $"/api/po/{poNumber}/lines";
             using var content = Serializer.CreateHttpContent(lines);
+            using var response = await _httpClient.PutAsync(requestUri, content);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await response.Content.ReadAsJObjectAsync();
+            }
+            throw await EncomposApiClientException.CreateAsync(response);
+        }
+
+        public async Task<JObject> AddToPurchaseOrderAsync(AddToPurchaseOrderModel model)
+        {
+            var requestUri = $"/api/po/add-to-order";
+            using var content = Serializer.CreateHttpContent(model);
             using var response = await _httpClient.PutAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
