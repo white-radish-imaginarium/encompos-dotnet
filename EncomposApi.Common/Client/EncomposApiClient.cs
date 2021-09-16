@@ -228,7 +228,7 @@ namespace EncomposApi.Client
         {
             var requestUri = $"/api/po/add-to-order";
             using var content = Serializer.CreateHttpContent(model);
-            using var response = await _httpClient.PutAsync(requestUri, content);
+            using var response = await _httpClient.PostAsync(requestUri, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJObjectAsync();
