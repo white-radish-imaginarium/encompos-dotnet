@@ -11,6 +11,7 @@ namespace EncomposApi
         public CatalogItemModel[] Catalogs { get; set; }
         public PurchaseOrderLineModel[] OpenOrders { get; set; }
         public PromotionItemModel[] Promotions { get; set; }
+        public SalesModel[] RecentSales { get; set; }
 
         [JsonIgnore]
         public int Status { get; set; } = 200;
