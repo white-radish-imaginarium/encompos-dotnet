@@ -200,6 +200,18 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
+        public async Task<JObject> QueryPriceChangesAsync(PriceChangeQuery query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/inventory/price-changes/query";
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await response.Content.ReadAsJObjectAsync(cancellationToken);
+            }
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+        }
+
         public async Task<JArray> QueryPurchaseOrdersAsync(PurchaseOrderQuery query, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/po/query";

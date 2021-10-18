@@ -20,9 +20,9 @@ namespace EncomposApi
 
         public bool IncludePromotions { get; init; }
 
-        public bool QueryFixedPrices { get; init; }
-
         public bool IncludeRecentSales { get; init; }
+
+        public bool QueryFixedPrices { get; init; }
     }
 
     public class InventoryQueryValidator : AbstractValidator<InventoryQuery>
