@@ -4,19 +4,15 @@ using EncomposApi.Models;
 
 namespace EncomposApi
 {
-    public class InventoryResult
+    public class InventoryPutResult
     {
         public string Code { get; set; }
         public InventoryModel Inventory { get; set; }
-        public CatalogItemModel[] Catalogs { get; set; }
-        public PurchaseOrderLineModel[] OpenOrders { get; set; }
-        public PromotionItemModel[] Promotions { get; set; }
-        public SalesModel[] RecentSales { get; set; }
 
         [JsonIgnore]
         public int Status { get; set; } = 200;
 
-        public static implicit operator JsonResult(InventoryResult result)
+        public static implicit operator JsonResult(InventoryPutResult result)
         {
             return new JsonResult(result)
             {

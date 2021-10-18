@@ -1,7 +1,4 @@
 ﻿using EncomposApi.Models;
-using EncomposApi.Types.Optional;
-using FluentValidation;
-using System;
 
 namespace EncomposApi
 {

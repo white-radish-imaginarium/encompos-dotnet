@@ -152,10 +152,10 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
-        public async Task<InventoryResult[]> QueryTypedInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+        public async Task<InventoryQueryResult[]> QueryTypedInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             var jarray = await QueryInventoryAsync(query, cancellationToken);
-            var results = jarray.Select(Deserialize<InventoryResult>).ToArray();
+            var results = jarray.Select(Deserialize<InventoryQueryResult>).ToArray();
             return results;
         }
 
