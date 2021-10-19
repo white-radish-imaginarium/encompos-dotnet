@@ -7,6 +7,5 @@ namespace EncomposApi
         public int Remaining { get; init; }
         public PriceChangeQuery NextQuery { get; init; }
         public PriceChangeModel[] PriceChanges { get; init; }
-        public PriceChangeReasonModel[] Reasons { get; init; }
     }
 }

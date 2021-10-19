@@ -15,7 +15,7 @@ namespace EncomposApi.Models
         public Optional<decimal> NewRetail { get; set; }
         public Optional<decimal> OldMargin { get; set; }
         public Optional<decimal> NewMargin { get; set; }
-        public Optional<PriceChangeReason> Reason { get; set; }
+        public Optional<string> Reason { get; set; }
         public Optional<int> CompetitorId { get; set; }
     }
 }
