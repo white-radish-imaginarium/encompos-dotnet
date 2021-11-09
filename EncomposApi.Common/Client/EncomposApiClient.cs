@@ -162,17 +162,24 @@ namespace EncomposApi.Client
         public async Task<JArray> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
         {
             JArray results = new();
-            int pos = 0, len = query.Codes.Length;
-            int batchSize = 100;
-            while (pos < len)
+            if (query.Codes == null)
             {
-                string[] codes = new string[Math.Min(batchSize, len - pos)];
-                Array.Copy(query.Codes, pos, codes, 0, codes.Length);
-                JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
+                JArray batch = await QueryInventoryOnceAsync(query, cancellationToken);
                 results.Merge(batch);
-                pos += batchSize;
             }
-
+            else
+            {
+                int pos = 0, len = query.Codes.Length;
+                int batchSize = 100;
+                while (pos < len)
+                {
+                    string[] codes = new string[Math.Min(batchSize, len - pos)];
+                    Array.Copy(query.Codes, pos, codes, 0, codes.Length);
+                    JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
+                    results.Merge(batch);
+                    pos += batchSize;
+                }
+            }
             return results;
         }
 
