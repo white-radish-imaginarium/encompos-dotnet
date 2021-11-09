@@ -265,5 +265,17 @@ namespace EncomposApi.Client
             }
             throw await EncomposApiClientException.CreateAsync(response);
         }
+
+        public async Task<JArray> ApplyFixedPricingAsync()
+        {
+            var requestUri = $"/api/inventory/apply-fixed-pricing";
+            using var content = Serializer.CreateHttpContent(new object());
+            using var response = await _httpClient.PostAsync(requestUri, content);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await response.Content.ReadAsJArrayAsync();
+            }
+            throw await EncomposApiClientException.CreateAsync(response);
+        }
     }
 }
