@@ -203,7 +203,14 @@ namespace EncomposApi.Types.Optional
 		{
 			if (!_hasValue) return alternative; 
 			return _value;
-		} 
+		}
+
+		/// <summary>
+		/// Returns the existing value if present, or throws an <see cref="InvalidOperationException"/>.
+		/// </summary>
+		/// <param name="alternative">The alternative value.</param>
+		/// <returns>The existing or alternative value.</returns>
+		public T Value => _hasValue ? _value : throw new InvalidOperationException("Optional object must have a value.");
 
 		/// <summary>
 		/// Uses an alternative value, if no existing value is present.

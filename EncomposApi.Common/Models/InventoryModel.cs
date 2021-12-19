@@ -59,8 +59,5 @@ namespace EncomposApi.Models
         /// Aliases from the alias_codes table
         /// </summary>
         public Optional<IList<AliasModel>> MoreAliases { get; set; }
-
-        [JsonProperty("_diff")]
-        public Optional<JToken> Diff { get; set; }
     }
 }

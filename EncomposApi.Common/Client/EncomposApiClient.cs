@@ -207,9 +207,33 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
+        public async Task<JObject> AdjustQohAsync(string productCode, AdjustQohModel model)
+        {
+            var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/adjust-qoh";
+            using var content = Serializer.CreateHttpContent(model);
+            using var response = await _httpClient.PostAsync(requestUri, content);
+            if (response.StatusCode == HttpStatusCode.Created)
+            {
+                return await response.Content.ReadAsJObjectAsync();
+            }
+            throw await EncomposApiClientException.CreateAsync(response);
+        }
+
+        public async Task<JObject> QueryQohMovementAsync(string productCode, QohMovementQuery query)
+        {
+            var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/query-qoh-movement";
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content);
+            if (response.StatusCode == HttpStatusCode.Created)
+            {
+                return await response.Content.ReadAsJObjectAsync();
+            }
+            throw await EncomposApiClientException.CreateAsync(response);
+        }
+
         public async Task<JObject> QueryPriceChangesAsync(PriceChangeQuery query, CancellationToken cancellationToken = default)
         {
-            var requestUri = $"/api/inventory/price-changes/query";
+            var requestUri = $"/api/inventory/query-price-changes";
             using var content = Serializer.CreateHttpContent(query);
             using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
             if (response.StatusCode == HttpStatusCode.OK)

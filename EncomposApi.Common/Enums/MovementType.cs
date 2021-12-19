@@ -1,6 +1,9 @@
 ﻿namespace EncomposApi.Enums
 {
-    public enum MovementCode
+    /// <summary>
+    /// Business process where the QOH movement originates.
+    /// </summary>
+    public enum MovementType
     {
         PointOfSale = 1,
         PointOfSaleRefund = 2,
