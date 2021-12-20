@@ -212,21 +212,21 @@ namespace EncomposApi.Client
             var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/adjust-qoh";
             using var content = Serializer.CreateHttpContent(model);
             using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.Created)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsJObjectAsync();
             }
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
-        public async Task<JObject> QueryQohMovementAsync(string productCode, QohMovementQuery query)
+        public async Task<JArray> QueryQohMovementAsync(string productCode, QohMovementQuery query)
         {
             var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/query-qoh-movement";
             using var content = Serializer.CreateHttpContent(query);
             using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.Created)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsJObjectAsync();
+                return await response.Content.ReadAsJArrayAsync();
             }
             throw await EncomposApiClientException.CreateAsync(response);
         }
