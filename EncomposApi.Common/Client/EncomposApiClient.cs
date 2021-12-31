@@ -26,7 +26,7 @@ namespace EncomposApi.Client
             _httpClient = httpClientFactory.CreateClient("encompos");
         }
 
-        public T Deserialize<T>(JToken token)
+        public static T Deserialize<T>(JToken token)
         {
             return token.ToObject<T>(Serializer);
         }
@@ -85,7 +85,7 @@ namespace EncomposApi.Client
             return new JObject();
         }
 
-        public string NormalizeEmail(string email)
+        public static string NormalizeEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;
 
