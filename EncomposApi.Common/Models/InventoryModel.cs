@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using EncomposApi.Enums;
 using EncomposApi.Types.Optional;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace EncomposApi.Models
 {
@@ -17,6 +16,8 @@ namespace EncomposApi.Models
         public Optional<string> ItemSize { get; set; }
         public Optional<string> Attribute { get; set; }
         public Optional<InventoryType> InventoryType { get; set; }
+        public Optional<bool> Inactive { get; set; }
+        public Optional<string> ExpirationDate { get; set; }
 
         public Optional<decimal?> FixedPrice { get; set; }
         public Optional<decimal> RetailPrice { get; set; }
