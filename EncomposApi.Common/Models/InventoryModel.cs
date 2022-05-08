@@ -16,6 +16,7 @@ namespace EncomposApi.Models
         public Optional<string> ItemSize { get; set; }
         public Optional<string> Attribute { get; set; }
         public Optional<InventoryType> InventoryType { get; set; }
+        public Optional<AssemblyType> AssemblyType { get; set; }
         public Optional<bool> Discontinued { get; set; }
         public Optional<string> ExpirationDate { get; set; }
 
@@ -24,8 +25,10 @@ namespace EncomposApi.Models
         public Optional<decimal> UnitCost { get; set; }
         public Optional<decimal> Markup { get; set; }
         public Optional<decimal> Margin { get; set; }
-        public Optional<decimal?> DefautQty { get; set; }
         public Optional<bool> IsWeighed { get; set; }
+
+        public Optional<decimal?> DefaultQty { get; set; }
+        public Optional<BottleDepositModel> BottleDeposit { get; set; }
 
         public Optional<decimal> QtyOnHand { get; set; }
         public Optional<decimal?> MinQty { get; set; }
