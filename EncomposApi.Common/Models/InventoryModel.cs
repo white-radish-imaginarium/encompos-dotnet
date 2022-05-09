@@ -17,6 +17,7 @@ namespace EncomposApi.Models
         public Optional<string> Attribute { get; set; }
         public Optional<InventoryType> InventoryType { get; set; }
         public Optional<AssemblyType> AssemblyType { get; set; }
+        public Optional<InventoryPresetType> Preset { get; set; }
         public Optional<bool> Discontinued { get; set; }
         public Optional<string> ExpirationDate { get; set; }
 
