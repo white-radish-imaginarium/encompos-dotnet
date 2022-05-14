@@ -6,9 +6,9 @@ namespace EncomposApi.Enums
 {
     public enum InventoryPresetType
     {
-        None = 1,
-        SingleWithDeposit = 2,
-        FourPackWithDeposit = 3,
-        SixPackWithDeposit = 4
+        None = 0,
+        SingleWithDeposit = 1,
+        FourPackWithDeposit = 2,
+        SixPackWithDeposit = 3
     }
 }
