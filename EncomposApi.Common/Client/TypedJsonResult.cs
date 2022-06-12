@@ -20,7 +20,7 @@ namespace EncomposApi.Client
 
         public JToken Json { get; init; }
 
-        public T ToObject() => Json.ToObject<T>(_serializer.Value);
+        public T ToObject() => Json == null ? default : Json.ToObject<T>(_serializer.Value);
 
         public int Status { get; set; } = 200;
 

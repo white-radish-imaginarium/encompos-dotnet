@@ -299,7 +299,7 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
-        public async Task<TypedJsonResult<InventoryModel>> EnsureFixedPricingAsync()
+        public async Task<TypedJsonResult<InventoryModel[]>> EnsureFixedPricingAsync()
         {
             var requestUri = $"/api/inventory/ensure-fixed-pricing";
             using var content = Serializer.CreateHttpContent(new object());
@@ -307,7 +307,7 @@ namespace EncomposApi.Client
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var json = await response.Content.ReadAsJArrayAsync();
-                return new TypedJsonResult<InventoryModel>(json, response.StatusCode);
+                return new TypedJsonResult<InventoryModel[]>(json, response.StatusCode);
             }
             throw await EncomposApiClientException.CreateAsync(response);
         }
