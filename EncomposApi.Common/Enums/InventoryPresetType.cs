@@ -9,6 +9,8 @@ namespace EncomposApi.Enums
         None = 0,
         SingleWithDeposit = 1,
         FourPackWithDeposit = 2,
-        SixPackWithDeposit = 3
+        SixPackWithDeposit = 3,
+        FourPackNoDeposit = 4,
+        SixPackNoDeposit = 5
     }
 }
