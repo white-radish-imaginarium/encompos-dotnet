@@ -2,7 +2,7 @@
 
 namespace EncomposApi
 {
-    public record ApplyPresetResult
+    public record ApplyDepositTypeResult
     {
         public InventoryModel Inventory { get; init; }
     }
