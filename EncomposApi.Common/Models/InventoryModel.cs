@@ -15,6 +15,8 @@ namespace EncomposApi.Models
         public Optional<string> Description { get; set; }
         public Optional<string> ItemSize { get; set; }
         public Optional<string> Attribute { get; set; }
+        public Optional<string> CountryOfOrigin { get; set; }
+
         public Optional<InventoryType> InventoryType { get; set; }
         public Optional<AssemblyType> AssemblyType { get; set; }
         public Optional<DepositType> DepositType { get; set; }
