@@ -15,5 +15,11 @@ namespace EncomposApi.Enums
 
         [EnumMember(Value = "15c")]
         FifteenCents = 2,
+
+        [EnumMember(Value = "20c")]
+        TwentyCents = 3,
+
+        [EnumMember(Value = "30c")]
+        ThirtyCents = 4,
     }
 }
