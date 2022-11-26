@@ -17,14 +17,14 @@ namespace EncomposApi.Models
     {
         public AddToPurchaseOrderModelValidator()
         {
-            RuleFor(item => item.SupplierId).ScalePrecision(0, 5, ignoreTrailingZeros: true);
+            RuleFor(item => item.SupplierId).PrecisionScale(5, 0, true);
             RuleFor(item => item.ItemNumber).MaximumLength(20);
             RuleFor(item => item.ItemNumber).NotEmpty().When(i => string.IsNullOrEmpty(i.ProductCode));
             RuleFor(item => item.ProductCode).MaximumLength(15);
             RuleFor(item => item.ProductCode).NotEmpty().When(i => string.IsNullOrEmpty(i.ItemNumber));
-            RuleFor(item => item.CaseCost).ScalePrecision(4, 19);
+            RuleFor(item => item.CaseCost).PrecisionScale(19, 4, true);
             RuleFor(item => item.PackSize).InclusiveBetween(1, uint.MaxValue);
-            RuleFor(item => item.OrderQty).ScalePrecision(3, 10);
+            RuleFor(item => item.OrderQty).PrecisionScale(10, 3, true);
         }
     }
 }
