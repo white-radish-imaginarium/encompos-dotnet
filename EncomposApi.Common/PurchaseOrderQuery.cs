@@ -1,9 +1,14 @@
-﻿using FluentValidation;
+﻿using EncomposApi.Enums;
+using FluentValidation;
 
 namespace EncomposApi
 {
     public record PurchaseOrderQuery
     {
+        public decimal? SupplierId { get; set; }
+
+        public PurchaseOrderState[] States { get; set; }
+
         public int? PageSize { get; init; }
 
         public decimal? BeforePoNumber { get; init; }
