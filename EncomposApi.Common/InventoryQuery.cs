@@ -5,6 +5,8 @@ namespace EncomposApi
     public record InventoryQuery
     {
         public string[] Codes { get; init; }
+
+        public InventorySearchModel Search { get; init; }
         
         /// <summary>
         /// Include catalog items in the results.
@@ -32,6 +34,7 @@ namespace EncomposApi
         public InventoryQueryValidator()
         {
             RuleFor(p => p.Codes).Must(codes => codes.Length <= 100).When(p => p.Codes is not null).WithMessage("Too many codes");
+            RuleFor(p => p.Search).SetValidator(new InventorySearchModelValidator());
         }
     }
 }
