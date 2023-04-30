@@ -312,15 +312,15 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response);
         }
 
-        public async Task<TypedJsonResult<UserResult[]>> AuthenticateUserAsync(UserAuthenticationQuery query, CancellationToken cancellationToken)
+        public async Task<TypedJsonResult<UserResult>> AuthenticateUserAsync(UserAuthenticationQuery query, CancellationToken cancellationToken)
         {
             var requestUri = $"/api/users/authenticate";
             using var content = Serializer.CreateHttpContent(query);
             using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
-                return new TypedJsonResult<UserResult[]>(json, response.StatusCode);
+                var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
+                return new TypedJsonResult<UserResult>(json, response.StatusCode);
             }
             throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
