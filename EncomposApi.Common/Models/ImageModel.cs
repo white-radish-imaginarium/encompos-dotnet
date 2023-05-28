@@ -1,4 +1,5 @@
 ﻿
+using EncomposApi.Types.Optional;
 using Newtonsoft.Json;
 
 namespace EncomposApi.Models
@@ -15,5 +16,11 @@ namespace EncomposApi.Models
 
         [JsonIgnore]
         public byte[] Bytes { get; set; }
+
+        public Optional<long> Resize { get; set; }
+
+        [JsonIgnore]
+        public Optional<byte[]> ResizeBytes { get; set; }
+
     }
 }
