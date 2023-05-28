@@ -59,8 +59,7 @@ namespace EncomposApi.Client
                 {
                     EncomposApiClientOptions options = p.GetService<IOptions<EncomposApiClientOptions>>().Value;
                     c.BaseAddress = new Uri(options.BaseUrl);
-                    c.DefaultRequestHeaders.Add("X-Api-Key", options.ApiKey);
-                    c.DefaultRequestHeaders.Add("User-Agent", string.IsNullOrEmpty(options.UserAgent) ? nameof(EncomposApiClient) : options.UserAgent);
+                    options.ConfigureHeaders(c.DefaultRequestHeaders);
                 })
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {
