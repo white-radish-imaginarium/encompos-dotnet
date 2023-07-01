@@ -1,10 +1,13 @@
-﻿using FluentValidation;
+﻿using EncomposApi.Enums;
+using FluentValidation;
 
 namespace EncomposApi;
 
 public record InventorySearchModel
 {
     public string SearchTerm { get; init; }
+
+    public SearchField SearchFields { get; init; } = SearchField.Brand | SearchField.Description;
 
     public int PageIndex { get; init; } = 0;
 
