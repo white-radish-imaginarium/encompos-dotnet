@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using EncomposApi.Enums;
 using EncomposApi.Types.Optional;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace EncomposApi.Models
@@ -66,5 +67,8 @@ namespace EncomposApi.Models
         /// Aliases from the alias_codes table
         /// </summary>
         public Optional<IList<AliasModel>> MoreAliases { get; set; }
+
+        public Optional<int> CategoryId { get; set; }
+        public Optional<string> CategoryName { get; set; }
     }
 }

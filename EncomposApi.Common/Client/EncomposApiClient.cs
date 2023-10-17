@@ -146,6 +146,19 @@ namespace EncomposApi.Client
             throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
         }
 
+        public async Task<TypedJsonResult<InventoryCategoryModel[]>> QueryInventoryCategoriesAsync(InventoryCategoryQuery query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/inventory/categories";
+            using var content = Serializer.CreateHttpContent(query);
+            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+                return new TypedJsonResult<InventoryCategoryModel[]>(json, response.StatusCode);
+            }
+            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+        }
+
         public async Task<TypedJsonResult<NextAvailableProductCodeResult>> GetNextAvailableProductCodeAsync(NextAvailableProductCodeQuery query, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/inventory/next-code";
