@@ -68,7 +68,7 @@ namespace EncomposApi.Models
         /// </summary>
         public Optional<IList<AliasModel>> MoreAliases { get; set; }
 
-        public Optional<int> CategoryId { get; set; }
+        public Optional<int?> CategoryId { get; set; }
         public Optional<string> CategoryName { get; set; }
     }
 }
