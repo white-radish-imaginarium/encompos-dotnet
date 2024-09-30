@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace EncomposApi.Client
 {
-    public class EncomposApiClientException : Exception
+    public class WooCommerceApiClientException : Exception
     {
-        public EncomposApiClientException(HttpStatusCode statusCode, string message, object details = null) : base(message)
+        public WooCommerceApiClientException(HttpStatusCode statusCode, string message, object details = null) : base(message)
         {
             StatusCode = statusCode;
             Details = details;
@@ -19,7 +19,7 @@ namespace EncomposApi.Client
 
         public object Details { get; }
 
-        public static async Task<EncomposApiClientException> CreateAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+        public static async Task<WooCommerceApiClientException> CreateAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
             return response.StatusCode switch
             {
@@ -28,7 +28,7 @@ namespace EncomposApi.Client
             };
         }
 
-        private static async Task<EncomposApiClientException> CreateFromContentAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+        private static async Task<WooCommerceApiClientException> CreateFromContentAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
             string content = await response.Content.ReadAsStringAsync(cancellationToken);
             if (string.IsNullOrEmpty(content)) return CreateFromMessage(response.StatusCode);
@@ -43,7 +43,7 @@ namespace EncomposApi.Client
             }
         }
 
-        private static EncomposApiClientException CreateFromJson(HttpStatusCode statusCode, JObject body)
+        private static WooCommerceApiClientException CreateFromJson(HttpStatusCode statusCode, JObject body)
         {
             string reason = null;
             object details = null;
@@ -56,13 +56,13 @@ namespace EncomposApi.Client
             return CreateFromMessage(statusCode, reason, details);
         }
 
-        private static EncomposApiClientException CreateFromMessage(HttpStatusCode statusCode, string message = null, object details = null)
+        private static WooCommerceApiClientException CreateFromMessage(HttpStatusCode statusCode, string message = null, object details = null)
         {
             if (string.IsNullOrEmpty(message))
             {
                 message = $"{(int)statusCode}";
             }
-            return new EncomposApiClientException(statusCode, message, details);
+            return new WooCommerceApiClientException(statusCode, message, details);
         }
 
     }

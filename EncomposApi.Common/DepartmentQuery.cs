@@ -10,6 +10,8 @@ namespace EncomposApi
         /// Include inventory defaults.
         /// </summary>
         public bool IncludeDefaults { get; init; }
+
+        public bool IncludeCounts { get; init; }
     }
 
     public class DepartmentQueryValidator : AbstractValidator<DepartmentQuery>

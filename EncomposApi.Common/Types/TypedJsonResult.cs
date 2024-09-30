@@ -5,7 +5,7 @@ using EncomposApi.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace EncomposApi.Client
+namespace EncomposApi.Types
 {
     public record TypedJsonResult<T>
     {

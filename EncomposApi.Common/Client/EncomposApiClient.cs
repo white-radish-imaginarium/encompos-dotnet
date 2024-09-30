@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using EncomposApi.Json;
 using EncomposApi.Models;
+using EncomposApi.Types;
 
 namespace EncomposApi.Client
 {
@@ -60,7 +61,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<CustomerModel>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<CustomerModel>> GetCustomerAsync(string email, CancellationToken cancellationToken = default)
@@ -117,7 +118,7 @@ namespace EncomposApi.Client
             {
                 return await response.Content.ReadAsJArrayAsync(cancellationToken);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<DepartmentModel[]>> QueryDepartmentsAsync(DepartmentQuery query, CancellationToken cancellationToken = default)
@@ -130,7 +131,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
                 return new TypedJsonResult<DepartmentModel[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<SupplierModel[]>> QuerySuppliersAsync(SupplierQuery query, CancellationToken cancellationToken = default)
@@ -143,7 +144,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
                 return new TypedJsonResult<SupplierModel[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<InventoryCategoryModel[]>> QueryInventoryCategoriesAsync(InventoryCategoryQuery query, CancellationToken cancellationToken = default)
@@ -156,7 +157,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
                 return new TypedJsonResult<InventoryCategoryModel[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<NextAvailableProductCodeResult>> GetNextAvailableProductCodeAsync(NextAvailableProductCodeQuery query, CancellationToken cancellationToken = default)
@@ -169,7 +170,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
                 return new TypedJsonResult<NextAvailableProductCodeResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<InventoryQueryResult[]>> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
@@ -206,7 +207,7 @@ namespace EncomposApi.Client
             {
                 return await response.Content.ReadAsJArrayAsync(cancellationToken);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<InventoryPutResult>> PutInventoryAsync(string productCode, JObject model)
@@ -219,7 +220,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<InventoryPutResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<AdjustQohResult>> AdjustQohAsync(string productCode, AdjustQohModel model)
@@ -232,7 +233,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<AdjustQohResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<QohMovementModel[]>> QueryQohMovementAsync(string productCode, QohMovementQuery query)
@@ -245,7 +246,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync();
                 return new TypedJsonResult<QohMovementModel[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<PriceChangeResult>> QueryPriceChangesAsync(PriceChangeQuery query, CancellationToken cancellationToken = default)
@@ -258,7 +259,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
                 return new TypedJsonResult<PriceChangeResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<PurchaseOrderResult[]>> QueryPurchaseOrdersAsync(PurchaseOrderQuery query, CancellationToken cancellationToken = default)
@@ -271,7 +272,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
                 return new TypedJsonResult<PurchaseOrderResult[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
 
         public async Task<TypedJsonResult<PurchaseOrderResult>> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
@@ -284,7 +285,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<PurchaseOrderResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<PurchaseOrderLineModel>> AddToPurchaseOrderAsync(AddToPurchaseOrderModel model)
@@ -297,7 +298,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<PurchaseOrderLineModel>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<ApiResult>> DeletePurchaseOrderLineAsync(decimal poNumber, decimal poLineId)
@@ -309,7 +310,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync();
                 return new TypedJsonResult<ApiResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<InventoryModel[]>> EnsureFixedPricingAsync()
@@ -322,7 +323,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJArrayAsync();
                 return new TypedJsonResult<InventoryModel[]>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response);
+            throw await ApiClientException.CreateAsync(response);
         }
 
         public async Task<TypedJsonResult<UserResult>> AuthenticateUserAsync(UserAuthenticationQuery query, CancellationToken cancellationToken)
@@ -335,7 +336,7 @@ namespace EncomposApi.Client
                 var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
                 return new TypedJsonResult<UserResult>(json, response.StatusCode);
             }
-            throw await EncomposApiClientException.CreateAsync(response, cancellationToken);
+            throw await ApiClientException.CreateAsync(response, cancellationToken);
         }
     }
 }

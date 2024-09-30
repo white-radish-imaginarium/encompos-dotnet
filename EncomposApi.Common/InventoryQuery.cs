@@ -7,7 +7,9 @@ namespace EncomposApi
         public string[] Codes { get; init; }
 
         public InventorySearchModel Search { get; init; }
-        
+
+        public InventoryPageModel Paging { get; init; }
+
         /// <summary>
         /// Include catalog items in the results.
         /// </summary>
