@@ -1,10 +1,9 @@
 ﻿using EncomposApi.Models;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+public record AdjustQohResult
 {
-    public record AdjustQohResult
-    {
-        public InventoryModel Inventory { get; init; }
-        public QohMovementModel[] QohMovement { get; init; }
-    }
+    public InventoryModel Inventory { get; init; }
+    public QohMovementModel[] QohMovement { get; init; }
 }

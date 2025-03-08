@@ -1,8 +1,7 @@
-﻿namespace EncomposApi.Enums
+﻿namespace EncomposApi.Enums;
+
+public enum PurchaseOrderStatus
 {
-    public enum PurchaseOrderStatus
-    {
-        InProgress = 0,
-        Complete = 1
-    }
+    InProgress = 0,
+    Complete = 1
 }

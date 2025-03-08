@@ -1,8 +1,7 @@
-﻿namespace EncomposApi
+﻿namespace EncomposApi;
+
+public record ImageQuery
 {
-    public record ImageQuery
-    {
-        public string[] PluCodes { get; init; }
-        public long[] ImageIds { get; init; }
-    }
+    public string[] PluCodes { get; init; }
+    public long[] ImageIds { get; init; }
 }

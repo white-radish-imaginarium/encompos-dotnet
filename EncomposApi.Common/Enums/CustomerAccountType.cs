@@ -1,8 +1,7 @@
-﻿namespace EncomposApi.Enums
+﻿namespace EncomposApi.Enums;
+
+public enum CustomerAccountType
 {
-    public enum CustomerAccountType
-    {
-        Personal = 0,
-        Business = 1
-    }
+    Personal = 0,
+    Business = 1
 }

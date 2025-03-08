@@ -11,332 +11,331 @@ using EncomposApi.Json;
 using EncomposApi.Models;
 using EncomposApi.Types;
 
-namespace EncomposApi.Client
+namespace EncomposApi.Client;
+
+public class EncomposApiClient
 {
-    public class EncomposApiClient
+    private readonly static Lazy<JsonSerializer> _serializer = 
+        new(() => JsonUtilities.CreateSerializer());
+
+    private static JsonSerializer Serializer => _serializer.Value;
+
+    private readonly HttpClient _httpClient;
+
+    public EncomposApiClient(IHttpClientFactory httpClientFactory)
     {
-        private readonly static Lazy<JsonSerializer> _serializer = 
-            new(() => JsonUtilities.CreateSerializer());
+        _httpClient = httpClientFactory.CreateClient("encompos");
+    }
 
-        private static JsonSerializer Serializer => _serializer.Value;
+    public T Deserialize<T>(JToken token)
+    {
+        return token.ToObject<T>(Serializer);
+    }
 
-        private readonly HttpClient _httpClient;
+    public async Task<TypedJsonResult<CustomerModel>> GetOrCreateCustomerAsync(
+        string email, 
+        string firstName, 
+        string lastName, 
+        string phone, 
+        bool? canText)
+    {
+        email = email?.ToLowerInvariant().Trim();
+        var normalizedEmail = NormalizeEmail(email);
 
-        public EncomposApiClient(IHttpClientFactory httpClientFactory)
+        var body = new 
         {
-            _httpClient = httpClientFactory.CreateClient("encompos");
+            email,
+            otherEmails = email != normalizedEmail ? new[] { normalizedEmail } : null, 
+            firstName, 
+            lastName, 
+            phone, 
+            canText 
+        };
+
+        var requestUri = $"/api/customers/get-or-create";
+        using var content = Serializer.CreateHttpContent(body);
+        using var response = await _httpClient.PutAsync(requestUri, content);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<CustomerModel>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public T Deserialize<T>(JToken token)
+    public async Task<TypedJsonResult<CustomerModel>> GetCustomerAsync(string email, CancellationToken cancellationToken = default)
+    {
+        // check to see if we have an account using the raw email address first,
+        // if the raw email address doesn't match the normalized address.
+        email = email?.ToLowerInvariant().Trim();
+        var normalizedEmail = NormalizeEmail(email);
+        var query = new CustomerQuery
         {
-            return token.ToObject<T>(Serializer);
-        }
+            Emails = email == normalizedEmail 
+                ? new[] { email } 
+                : new[] { email, normalizedEmail }
+        };
+        var results = await QueryCustomersAsync(query, cancellationToken);
 
-        public async Task<TypedJsonResult<CustomerModel>> GetOrCreateCustomerAsync(
-            string email, 
-            string firstName, 
-            string lastName, 
-            string phone, 
-            bool? canText)
+        foreach (var result in results)
         {
-            email = email?.ToLowerInvariant().Trim();
-            var normalizedEmail = NormalizeEmail(email);
-
-            var body = new 
+            var jobj = (JObject)result;
+            if (jobj["customer"] != null)
             {
-                email,
-                otherEmails = email != normalizedEmail ? new[] { normalizedEmail } : null, 
-                firstName, 
-                lastName, 
-                phone, 
-                canText 
-            };
-
-            var requestUri = $"/api/customers/get-or-create";
-            using var content = Serializer.CreateHttpContent(body);
-            using var response = await _httpClient.PutAsync(requestUri, content);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<CustomerModel>(json, response.StatusCode);
+                return new TypedJsonResult<CustomerModel>(jobj, HttpStatusCode.OK);
             }
-            throw await ApiClientException.CreateAsync(response);
         }
 
-        public async Task<TypedJsonResult<CustomerModel>> GetCustomerAsync(string email, CancellationToken cancellationToken = default)
+        return new TypedJsonResult<CustomerModel>(null, HttpStatusCode.NotFound);
+    }
+
+    public string NormalizeEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+
+        // everything to lowercase, trimmed. sorry rando email providers!
+        email = email.ToLowerInvariant().Trim();
+
+        // normalize gmail addresses
+        if (email.EndsWith("@gmail.com"))
         {
-            // check to see if we have an account using the raw email address first,
-            // if the raw email address doesn't match the normalized address.
-            email = email?.ToLowerInvariant().Trim();
-            var normalizedEmail = NormalizeEmail(email);
-            var query = new CustomerQuery
-            {
-                Emails = email == normalizedEmail 
-                    ? new[] { email } 
-                    : new[] { email, normalizedEmail }
-            };
-            var results = await QueryCustomersAsync(query, cancellationToken);
-
-            foreach (var result in results)
-            {
-                var jobj = (JObject)result;
-                if (jobj["customer"] != null)
-                {
-                    return new TypedJsonResult<CustomerModel>(jobj, HttpStatusCode.OK);
-                }
-            }
-
-            return new TypedJsonResult<CustomerModel>(null, HttpStatusCode.NotFound);
+            var localPart = email.Split('@')[0];
+            localPart = Regex.Replace(localPart, "\\.", "");
+            localPart = Regex.Replace(localPart, "\\+.*", ""); 
+            email = localPart + "@gmail.com";
         }
 
-        public string NormalizeEmail(string email)
+        return email;
+    }
+
+    public async Task<JArray> QueryCustomersAsync(CustomerQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/customers/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            if (string.IsNullOrWhiteSpace(email)) return null;
-
-            // everything to lowercase, trimmed. sorry rando email providers!
-            email = email.ToLowerInvariant().Trim();
-
-            // normalize gmail addresses
-            if (email.EndsWith("@gmail.com"))
-            {
-                var localPart = email.Split('@')[0];
-                localPart = Regex.Replace(localPart, "\\.", "");
-                localPart = Regex.Replace(localPart, "\\+.*", ""); 
-                email = localPart + "@gmail.com";
-            }
-
-            return email;
+            return await response.Content.ReadAsJArrayAsync(cancellationToken);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<JArray> QueryCustomersAsync(CustomerQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<DepartmentModel[]>> QueryDepartmentsAsync(DepartmentQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/departments/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/customers/query";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                return await response.Content.ReadAsJArrayAsync(cancellationToken);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+            return new TypedJsonResult<DepartmentModel[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<DepartmentModel[]>> QueryDepartmentsAsync(DepartmentQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<SupplierModel[]>> QuerySuppliersAsync(SupplierQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/suppliers/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/departments/query";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
-                return new TypedJsonResult<DepartmentModel[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+            return new TypedJsonResult<SupplierModel[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<SupplierModel[]>> QuerySuppliersAsync(SupplierQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<InventoryCategoryModel[]>> QueryInventoryCategoriesAsync(InventoryCategoryQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/inventory/categories";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/suppliers/query";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
-                return new TypedJsonResult<SupplierModel[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+            return new TypedJsonResult<InventoryCategoryModel[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<InventoryCategoryModel[]>> QueryInventoryCategoriesAsync(InventoryCategoryQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<NextAvailableProductCodeResult>> GetNextAvailableProductCodeAsync(NextAvailableProductCodeQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/inventory/next-code";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/categories";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
-                return new TypedJsonResult<InventoryCategoryModel[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
+            return new TypedJsonResult<NextAvailableProductCodeResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<NextAvailableProductCodeResult>> GetNextAvailableProductCodeAsync(NextAvailableProductCodeQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<InventoryQueryResult[]>> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+    {
+        JArray results = new();
+        if (query.Codes == null)
         {
-            var requestUri = $"/api/inventory/next-code";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
-                return new TypedJsonResult<NextAvailableProductCodeResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            JArray batch = await QueryInventoryOnceAsync(query, cancellationToken);
+            results.Merge(batch);
         }
-
-        public async Task<TypedJsonResult<InventoryQueryResult[]>> QueryInventoryAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+        else
         {
-            JArray results = new();
-            if (query.Codes == null)
+            int pos = 0, len = query.Codes.Length;
+            int batchSize = 100;
+            while (pos < len)
             {
-                JArray batch = await QueryInventoryOnceAsync(query, cancellationToken);
+                string[] codes = new string[Math.Min(batchSize, len - pos)];
+                Array.Copy(query.Codes, pos, codes, 0, codes.Length);
+                JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
                 results.Merge(batch);
+                pos += batchSize;
             }
-            else
-            {
-                int pos = 0, len = query.Codes.Length;
-                int batchSize = 100;
-                while (pos < len)
-                {
-                    string[] codes = new string[Math.Min(batchSize, len - pos)];
-                    Array.Copy(query.Codes, pos, codes, 0, codes.Length);
-                    JArray batch = await QueryInventoryOnceAsync(query with { Codes = codes }, cancellationToken);
-                    results.Merge(batch);
-                    pos += batchSize;
-                }
-            }
-
-            return new TypedJsonResult<InventoryQueryResult[]>(results);
         }
 
-        private async Task<JArray> QueryInventoryOnceAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+        return new TypedJsonResult<InventoryQueryResult[]>(results);
+    }
+
+    private async Task<JArray> QueryInventoryOnceAsync(InventoryQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/inventory/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/query";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                return await response.Content.ReadAsJArrayAsync(cancellationToken);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            return await response.Content.ReadAsJArrayAsync(cancellationToken);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<InventoryPutResult>> PutInventoryAsync(string productCode, JObject model)
+    public async Task<TypedJsonResult<InventoryPutResult>> PutInventoryAsync(string productCode, JObject model)
+    {
+        var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}";
+        using var content = Serializer.CreateHttpContent(model);
+        using var response = await _httpClient.PutAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.Created)
         {
-            var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}";
-            using var content = Serializer.CreateHttpContent(model);
-            using var response = await _httpClient.PutAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.Created)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<InventoryPutResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<InventoryPutResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<AdjustQohResult>> AdjustQohAsync(string productCode, AdjustQohModel model)
+    public async Task<TypedJsonResult<AdjustQohResult>> AdjustQohAsync(string productCode, AdjustQohModel model)
+    {
+        var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/adjust-qoh";
+        using var content = Serializer.CreateHttpContent(model);
+        using var response = await _httpClient.PostAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/adjust-qoh";
-            using var content = Serializer.CreateHttpContent(model);
-            using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<AdjustQohResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<AdjustQohResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<QohMovementModel[]>> QueryQohMovementAsync(string productCode, QohMovementQuery query)
+    public async Task<TypedJsonResult<QohMovementModel[]>> QueryQohMovementAsync(string productCode, QohMovementQuery query)
+    {
+        var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/query-qoh-movement";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/{Uri.EscapeDataString(productCode)}/query-qoh-movement";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync();
-                return new TypedJsonResult<QohMovementModel[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJArrayAsync();
+            return new TypedJsonResult<QohMovementModel[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<PriceChangeResult>> QueryPriceChangesAsync(PriceChangeQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<PriceChangeResult>> QueryPriceChangesAsync(PriceChangeQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/inventory/query-price-changes";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/query-price-changes";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
-                return new TypedJsonResult<PriceChangeResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
+            return new TypedJsonResult<PriceChangeResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<PurchaseOrderResult[]>> QueryPurchaseOrdersAsync(PurchaseOrderQuery query, CancellationToken cancellationToken = default)
+    public async Task<TypedJsonResult<PurchaseOrderResult[]>> QueryPurchaseOrdersAsync(PurchaseOrderQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/po/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/po/query";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
-                return new TypedJsonResult<PurchaseOrderResult[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+            return new TypedJsonResult<PurchaseOrderResult[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
 
-        public async Task<TypedJsonResult<PurchaseOrderResult>> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
+    public async Task<TypedJsonResult<PurchaseOrderResult>> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
+    {
+        var requestUri = $"/api/po/{poNumber}/lines";
+        using var content = Serializer.CreateHttpContent(lines);
+        using var response = await _httpClient.PutAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/po/{poNumber}/lines";
-            using var content = Serializer.CreateHttpContent(lines);
-            using var response = await _httpClient.PutAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<PurchaseOrderResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<PurchaseOrderResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<PurchaseOrderLineModel>> AddToPurchaseOrderAsync(AddToPurchaseOrderModel model)
+    public async Task<TypedJsonResult<PurchaseOrderLineModel>> AddToPurchaseOrderAsync(AddToPurchaseOrderModel model)
+    {
+        var requestUri = $"/api/po/add-to-order";
+        using var content = Serializer.CreateHttpContent(model);
+        using var response = await _httpClient.PostAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/po/add-to-order";
-            using var content = Serializer.CreateHttpContent(model);
-            using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<PurchaseOrderLineModel>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<PurchaseOrderLineModel>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<ApiResult>> DeletePurchaseOrderLineAsync(decimal poNumber, decimal poLineId)
+    public async Task<TypedJsonResult<ApiResult>> DeletePurchaseOrderLineAsync(decimal poNumber, decimal poLineId)
+    {
+        var requestUri = $"/api/po/{poNumber}/lines/{poLineId}";
+        using var response = await _httpClient.DeleteAsync(requestUri);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/po/{poNumber}/lines/{poLineId}";
-            using var response = await _httpClient.DeleteAsync(requestUri);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return new TypedJsonResult<ApiResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return new TypedJsonResult<ApiResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<InventoryModel[]>> EnsureFixedPricingAsync()
+    public async Task<TypedJsonResult<InventoryModel[]>> EnsureFixedPricingAsync()
+    {
+        var requestUri = $"/api/inventory/ensure-fixed-pricing";
+        using var content = Serializer.CreateHttpContent(new object());
+        using var response = await _httpClient.PostAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/inventory/ensure-fixed-pricing";
-            using var content = Serializer.CreateHttpContent(new object());
-            using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync();
-                return new TypedJsonResult<InventoryModel[]>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJArrayAsync();
+            return new TypedJsonResult<InventoryModel[]>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<TypedJsonResult<UserResult>> AuthenticateUserAsync(UserAuthenticationQuery query, CancellationToken cancellationToken)
+    public async Task<TypedJsonResult<UserResult>> AuthenticateUserAsync(UserAuthenticationQuery query, CancellationToken cancellationToken)
+    {
+        var requestUri = $"/api/users/authenticate";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var requestUri = $"/api/users/authenticate";
-            using var content = Serializer.CreateHttpContent(query);
-            using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
-                return new TypedJsonResult<UserResult>(json, response.StatusCode);
-            }
-            throw await ApiClientException.CreateAsync(response, cancellationToken);
+            var json = await response.Content.ReadAsJObjectAsync(cancellationToken);
+            return new TypedJsonResult<UserResult>(json, response.StatusCode);
         }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
     }
 }

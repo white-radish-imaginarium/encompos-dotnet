@@ -2,9 +2,9 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace EncomposApi.Types.Optional
-{
-    public class OptionalContractResolver : DefaultContractResolver
+namespace EncomposApi.Types.Optional;
+
+public class OptionalContractResolver : DefaultContractResolver
 	{
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
@@ -26,4 +26,3 @@ namespace EncomposApi.Types.Optional
 			return property;
 		}
 	}
-}

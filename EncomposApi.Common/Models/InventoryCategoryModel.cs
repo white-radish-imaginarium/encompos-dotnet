@@ -1,9 +1,8 @@
 ﻿
-namespace EncomposApi.Models
+namespace EncomposApi.Models;
+
+public class InventoryCategoryModel
 {
-    public class InventoryCategoryModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
+    public int Id { get; set; }
+    public string Name { get; set; }
 }

@@ -1,11 +1,10 @@
 ﻿using EncomposApi.Models;
 
-namespace EncomposApi
-{
-    public class ImageSellResult
-    {
-        public ImageSellCategoryModel[] Categories { get; set; }
+namespace EncomposApi;
 
-        public ImageSellModel[] Products { get; set; }
-    }
+public class ImageSellResult
+{
+    public ImageSellCategoryModel[] Categories { get; set; }
+
+    public ImageSellModel[] Products { get; set; }
 }

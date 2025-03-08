@@ -17,91 +17,90 @@ using Microsoft.AspNetCore.Http;
 using System.Reflection;
 using EncomposApi.Types;
 
-namespace EncomposApi.Sync.WooCommerce
+namespace EncomposApi.Sync.WooCommerce;
+
+public class WooCommerceApiClient
 {
-    public class WooCommerceApiClient
+    private readonly static Lazy<JsonSerializerSettings> _serializerSettings =
+        new(() => WooCommerceJsonUtilities.CreateSerializerSettings());
+
+    private readonly static Lazy<JsonSerializer> _serializer =
+        new(() => WooCommerceJsonUtilities.CreateSerializer());
+
+    private readonly HttpClient _httpClient;
+
+    public WooCommerceApiClient(IHttpClientFactory httpClientFactory, IOptionsSnapshot<WooCommerceOptions> options)
     {
-        private readonly static Lazy<JsonSerializerSettings> _serializerSettings =
-            new(() => WooCommerceJsonUtilities.CreateSerializerSettings());
+        // Convert the username and password to Base64
+        string baseAddress = options.Value.BaseAddress;
+        string username = options.Value.Key;
+        string password = options.Value.Secret;
+        string creds = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
 
-        private readonly static Lazy<JsonSerializer> _serializer =
-            new(() => WooCommerceJsonUtilities.CreateSerializer());
+        _httpClient = httpClientFactory.CreateClient();
+        _httpClient.BaseAddress = new Uri(baseAddress);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", creds);
+    }
 
-        private readonly HttpClient _httpClient;
+    public JsonSerializerSettings SerializerSettings => _serializerSettings.Value;
 
-        public WooCommerceApiClient(IHttpClientFactory httpClientFactory, IOptionsSnapshot<WooCommerceOptions> options)
+    public JsonSerializer Serializer => _serializer.Value;
+
+    public T Deserialize<T>(JToken token)
+    {
+        return token.ToObject<T>(Serializer);
+    }
+
+    public JToken Serialize<T>(T value)
+    {
+        return JToken.FromObject(value, Serializer);
+    }
+
+    public async Task<WooProductModel[]> ListProductsAsync(string sku = null)
+    {
+        var queryString = new QueryString();
+        if (!string.IsNullOrEmpty(sku))
         {
-            // Convert the username and password to Base64
-            string baseAddress = options.Value.BaseAddress;
-            string username = options.Value.Key;
-            string password = options.Value.Secret;
-            string creds = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
-
-            _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri(baseAddress);
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", creds);
+            queryString = queryString.Add(nameof(sku), sku);
         }
 
-        public JsonSerializerSettings SerializerSettings => _serializerSettings.Value;
+        var requestUri = $"products{queryString}";
 
-        public JsonSerializer Serializer => _serializer.Value;
+        using var response = await _httpClient.GetAsync(requestUri);
 
-        public T Deserialize<T>(JToken token)
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            return token.ToObject<T>(Serializer);
+            var json = await response.Content.ReadAsJArrayAsync();
+            return json.Select(Deserialize<WooProductModel>).ToArray();
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public JToken Serialize<T>(T value)
+    public async Task<WooProductModel> UpdateProductAsync(WooProductModel product)
+    {
+        var requestUri = $"products/{product.Id}";
+        var payload = product.ToUpdateModel();
+        using var content = Serializer.CreateHttpContent(payload);
+        using var response = await _httpClient.PutAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            return JToken.FromObject(value, Serializer);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return Deserialize<WooProductModel>(json);
         }
+        throw await ApiClientException.CreateAsync(response);
+    }
 
-        public async Task<WooProductModel[]> ListProductsAsync(string sku = null)
+    public async Task<WooProductModel> CreateProductAsync(WooProductModel product)
+    {
+        var requestUri = $"products";
+        var payload = product.ToCreateModel();
+        using var content = Serializer.CreateHttpContent(payload);
+        using var response = await _httpClient.PostAsync(requestUri, content);
+        if (response.StatusCode == HttpStatusCode.Created)
         {
-            var queryString = new QueryString();
-            if (!string.IsNullOrEmpty(sku))
-            {
-                queryString = queryString.Add(nameof(sku), sku);
-            }
-
-            var requestUri = $"products{queryString}";
-
-            using var response = await _httpClient.GetAsync(requestUri);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJArrayAsync();
-                return json.Select(Deserialize<WooProductModel>).ToArray();
-            }
-            throw await ApiClientException.CreateAsync(response);
+            var json = await response.Content.ReadAsJObjectAsync();
+            return Deserialize<WooProductModel>(json);
         }
-
-        public async Task<WooProductModel> UpdateProductAsync(WooProductModel product)
-        {
-            var requestUri = $"products/{product.Id}";
-            var payload = product.ToUpdateModel();
-            using var content = Serializer.CreateHttpContent(payload);
-            using var response = await _httpClient.PutAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return Deserialize<WooProductModel>(json);
-            }
-            throw await ApiClientException.CreateAsync(response);
-        }
-
-        public async Task<WooProductModel> CreateProductAsync(WooProductModel product)
-        {
-            var requestUri = $"products";
-            var payload = product.ToCreateModel();
-            using var content = Serializer.CreateHttpContent(payload);
-            using var response = await _httpClient.PostAsync(requestUri, content);
-            if (response.StatusCode == HttpStatusCode.Created)
-            {
-                var json = await response.Content.ReadAsJObjectAsync();
-                return Deserialize<WooProductModel>(json);
-            }
-            throw await ApiClientException.CreateAsync(response);
-        }
+        throw await ApiClientException.CreateAsync(response);
     }
 }

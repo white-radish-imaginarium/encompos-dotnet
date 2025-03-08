@@ -1,9 +1,8 @@
 ﻿
-namespace EncomposApi.Models
+namespace EncomposApi.Models;
+
+public class BrandModel
 {
-    public class BrandModel
-    {
-        public long Id { get; set; }
-        public string Name { get; set; }
-    }
+    public long Id { get; set; }
+    public string Name { get; set; }
 }

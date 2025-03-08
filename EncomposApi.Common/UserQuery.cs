@@ -1,7 +1,6 @@
-﻿namespace EncomposApi
+﻿namespace EncomposApi;
+
+public record UserQuery
 {
-    public record UserQuery
-    {
-        public string PIN { get; init; }
-    }
+    public string PIN { get; init; }
 }

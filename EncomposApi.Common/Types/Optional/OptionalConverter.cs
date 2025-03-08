@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace EncomposApi.Types.Optional
-{
+namespace EncomposApi.Types.Optional;
+
 	// based on: https://github.com/AndreyTsvetkov/Functional.Maybe/blob/master/Functional.Maybe.Json/MaybeConverter.cs
 	public class OptionalConverter : JsonConverter
 	{
@@ -102,4 +102,3 @@ namespace EncomposApi.Types.Optional
 			return new Optional<T>(value);
 		}
 	}
-}

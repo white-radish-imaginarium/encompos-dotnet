@@ -1,7 +1,6 @@
-﻿namespace EncomposApi
+﻿namespace EncomposApi;
+
+public record CustomerQuery
 {
-    public record CustomerQuery
-    {
-        public string[] Emails { get; init; }
-    }
+    public string[] Emails { get; init; }
 }

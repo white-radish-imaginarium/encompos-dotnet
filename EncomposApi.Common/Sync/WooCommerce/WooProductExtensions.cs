@@ -7,55 +7,54 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EncomposApi.Sync.WooCommerce
+namespace EncomposApi.Sync.WooCommerce;
+
+public static class WooProductExtensions
 {
-    public static class WooProductExtensions
+    public static WooProductModel CopyFrom(this WooProductModel product, InventoryModel inventory, PromotionItemModel promotionItem)
     {
-        public static WooProductModel CopyFrom(this WooProductModel product, InventoryModel inventory, PromotionItemModel promotionItem)
+        product.Sku = inventory.ProductCode;
+        inventory.Description.WhenPresent(value =>
         {
-            product.Sku = inventory.ProductCode;
-            inventory.Description.WhenPresent(value =>
-            {
-                product.Name = value;
-            });
+            product.Name = value;
+        });
 
-            inventory.RetailPrice.WhenPresent(value => product.RegularPrice = $"{value:N2}");
+        inventory.RetailPrice.WhenPresent(value => product.RegularPrice = $"{value:N2}");
 
-            if (promotionItem != null)
+        if (promotionItem != null)
+        {
+            var definitionId = promotionItem.DefinitionId.ValueOr(0);
+            var newPrice = promotionItem.NewPrice.ValueOr(0);
+            if (definitionId == 3)
             {
-                var definitionId = promotionItem.DefinitionId.ValueOr(0);
-                var newPrice = promotionItem.NewPrice.ValueOr(0);
-                if (definitionId == 3)
-                {
-                    product.SalePrice = $"{newPrice:N2}";
-                }
-                else
-                {
-                    product.SalePrice = null;
-                }
+                product.SalePrice = $"{newPrice:N2}";
             }
-
-            return product;
-        }
-
-        public static WooProductModel ToUpdateModel(this WooProductModel product)
-        {
-            return new WooProductModel
+            else
             {
-                Name = product.Name,
-                RegularPrice = product.RegularPrice,
-                Sku = product.Sku,
-            };
+                product.SalePrice = null;
+            }
         }
 
-        public static WooProductModel ToCreateModel(this WooProductModel product)
+        return product;
+    }
+
+    public static WooProductModel ToUpdateModel(this WooProductModel product)
+    {
+        return new WooProductModel
         {
-            return new WooProductModel
-            {
-                Name = product.Name,
-                RegularPrice = product.RegularPrice,
-                Sku = product.Sku,
-            };
-        }
+            Name = product.Name,
+            RegularPrice = product.RegularPrice,
+            Sku = product.Sku,
+        };
+    }
+
+    public static WooProductModel ToCreateModel(this WooProductModel product)
+    {
+        return new WooProductModel
+        {
+            Name = product.Name,
+            RegularPrice = product.RegularPrice,
+            Sku = product.Sku,
+        };
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace EncomposApi.Types.Optional
-{
-    public interface IOptional
+namespace EncomposApi.Types.Optional;
+
+public interface IOptional
 	{ 
 		public bool IsPresent { get; }
 	}
@@ -78,7 +78,7 @@ namespace EncomposApi.Types.Optional
 		}
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
+    {
 			if (_hasValue)
 			{
 				yield return _value;
@@ -86,16 +86,16 @@ namespace EncomposApi.Types.Optional
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
-        {
+    {
 			if (_hasValue)
 			{
 				yield return _value;
 			}
 		}
 
-        #region compare to
+    #region compare to
 
-        public int CompareTo(Optional<T> other)
+    public int CompareTo(Optional<T> other)
 		{
 			if (_hasValue && !other._hasValue) return 1;
 			if (!_hasValue && other._hasValue) return -1;
@@ -177,7 +177,7 @@ namespace EncomposApi.Types.Optional
 		/// <param name="present">The transformation function.</param>
 		/// <returns>The transformed optional.</returns>
 		public Optional<R> Map<R>(Func<T, R> present)
-        {
+    {
 			if (!_hasValue) return Optional<R>.Absent; 
 			return new Optional<R>(present(_value));
 		}
@@ -286,6 +286,5 @@ namespace EncomposApi.Types.Optional
 			if (!_hasValue) action();
 		}
 
-        #endregion
-    }
+    #endregion
 }

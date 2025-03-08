@@ -1,9 +1,8 @@
 ﻿using EncomposApi.Models;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+public record PriceChangeResult
 {
-    public record PriceChangeResult
-    {
-        public PriceChangeModel[] PriceChanges { get; init; }
-    }
+    public PriceChangeModel[] PriceChanges { get; init; }
 }

@@ -2,62 +2,61 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+[JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
+public class ApiResult : IActionResult
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
-    public class ApiResult : IActionResult
+    public ApiResult() { }
+    
+    public ApiResult(int status, string reason = null)
     {
-        public ApiResult() { }
-        
-        public ApiResult(int status, string reason = null)
+        Configure(status, reason);
+    }
+
+    [JsonProperty("status")]
+    public int? Status { get; set; }
+
+    [JsonProperty("ok")]
+    public bool Okay { get; set; }
+
+    [JsonProperty("message")]
+    public string Message { get; set; }
+
+    public void Configure(int status, string message = null)
+    {
+        Status = status;
+
+        if (status >= 200 && status < 300)
         {
-            Configure(status, reason);
+            Okay = true;
+            Message = message;
+            return;
         }
 
-        [JsonProperty("status")]
-        public int? Status { get; set; }
+        // if we actual have an error, use ApiError to determin the Message.
+        var error = new ApiError(status, message);
+        Okay = false;
+        Message = error.Reason;
+    }
 
-        [JsonProperty("ok")]
-        public bool Okay { get; set; }
+    public static ApiResult Ok(string message = null) => new (200, message);
+    
+    public static ApiResult Created(string message = null) => new (201, message);
+    
+    public static ApiResult Accepted(string message = null) => new (202, message);
 
-        [JsonProperty("message")]
-        public string Message { get; set; }
-
-        public void Configure(int status, string message = null)
+    public static implicit operator JsonResult(ApiResult res)
+    {
+        return new JsonResult(res)
         {
-            Status = status;
+            StatusCode = res.Status
+        };
+    }
 
-            if (status >= 200 && status < 300)
-            {
-                Okay = true;
-                Message = message;
-                return;
-            }
-
-            // if we actual have an error, use ApiError to determin the Message.
-            var error = new ApiError(status, message);
-            Okay = false;
-            Message = error.Reason;
-        }
-
-        public static ApiResult Ok(string message = null) => new (200, message);
-        
-        public static ApiResult Created(string message = null) => new (201, message);
-        
-        public static ApiResult Accepted(string message = null) => new (202, message);
-
-        public static implicit operator JsonResult(ApiResult res)
-        {
-            return new JsonResult(res)
-            {
-                StatusCode = res.Status
-            };
-        }
-
-        public Task ExecuteResultAsync(ActionContext context)
-        {
-            var jsonResult = (JsonResult)this;
-            return jsonResult.ExecuteResultAsync(context);
-        }
+    public Task ExecuteResultAsync(ActionContext context)
+    {
+        var jsonResult = (JsonResult)this;
+        return jsonResult.ExecuteResultAsync(context);
     }
 }

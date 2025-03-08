@@ -2,21 +2,20 @@
 using Newtonsoft.Json;
 using EncomposApi.Models;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+public class UserResult
 {
-    public class UserResult
+    public UserModel User { get; set; }
+
+    [JsonIgnore]
+    public int Status { get; set; } = 200;
+
+    public static implicit operator JsonResult(UserResult result)
     {
-        public UserModel User { get; set; }
-
-        [JsonIgnore]
-        public int Status { get; set; } = 200;
-
-        public static implicit operator JsonResult(UserResult result)
+        return new JsonResult(result)
         {
-            return new JsonResult(result)
-            {
-                StatusCode = result.Status
-            };
-        }
+            StatusCode = result.Status
+        };
     }
 }

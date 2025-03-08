@@ -2,15 +2,14 @@
 using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
-namespace EncomposApi.Sync
-{
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SyncTarget
-    {
-        [EnumMember(Value = "none")]
-        None = 0,
+namespace EncomposApi.Sync;
 
-        [EnumMember(Value = "woocommerce")]
-        WooCommerce = 1,
-    }
+[JsonConverter(typeof(StringEnumConverter))]
+public enum SyncTarget
+{
+    [EnumMember(Value = "none")]
+    None = 0,
+
+    [EnumMember(Value = "woocommerce")]
+    WooCommerce = 1,
 }

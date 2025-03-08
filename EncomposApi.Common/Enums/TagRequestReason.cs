@@ -1,9 +1,8 @@
-﻿namespace EncomposApi.Enums
+﻿namespace EncomposApi.Enums;
+
+public enum TagRequestReason
 {
-    public enum TagRequestReason
-    {
-        FormEdit = 1,
-        PoCostChange = 2,
-        RePrint = 3
-    }
+    FormEdit = 1,
+    PoCostChange = 2,
+    RePrint = 3
 }

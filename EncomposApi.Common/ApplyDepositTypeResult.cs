@@ -1,9 +1,8 @@
 ﻿using EncomposApi.Models;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+public record ApplyDepositTypeResult
 {
-    public record ApplyDepositTypeResult
-    {
-        public InventoryModel Inventory { get; init; }
-    }
+    public InventoryModel Inventory { get; init; }
 }

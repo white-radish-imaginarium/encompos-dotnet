@@ -1,10 +1,9 @@
 ﻿
-namespace EncomposApi.Models
-{
-    public class SupplierModel
+namespace EncomposApi.Models;
 
-    {
-        public decimal Id { get; set; }
-        public string Name { get; set; }
-    }
+public class SupplierModel
+
+{
+    public decimal Id { get; set; }
+    public string Name { get; set; }
 }

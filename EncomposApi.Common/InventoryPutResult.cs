@@ -2,22 +2,21 @@
 using Newtonsoft.Json;
 using EncomposApi.Models;
 
-namespace EncomposApi
+namespace EncomposApi;
+
+public class InventoryPutResult
 {
-    public class InventoryPutResult
+    public string Code { get; set; }
+    public InventoryModel Inventory { get; set; }
+
+    [JsonIgnore]
+    public int Status { get; set; } = 200;
+
+    public static implicit operator JsonResult(InventoryPutResult result)
     {
-        public string Code { get; set; }
-        public InventoryModel Inventory { get; set; }
-
-        [JsonIgnore]
-        public int Status { get; set; } = 200;
-
-        public static implicit operator JsonResult(InventoryPutResult result)
+        return new JsonResult(result)
         {
-            return new JsonResult(result)
-            {
-                StatusCode = result.Status
-            };
-        }
+            StatusCode = result.Status
+        };
     }
 }

@@ -1,15 +1,14 @@
 ﻿using FluentValidation;
 
-namespace EncomposApi
-{
-    public record SupplierQuery
-    {
-    }
+namespace EncomposApi;
 
-    public class SupplierQueryValidator : AbstractValidator<SupplierQuery>
+public record SupplierQuery
+{
+}
+
+public class SupplierQueryValidator : AbstractValidator<SupplierQuery>
+{
+    public SupplierQueryValidator()
     {
-        public SupplierQueryValidator()
-        {
-        }
     }
 }
