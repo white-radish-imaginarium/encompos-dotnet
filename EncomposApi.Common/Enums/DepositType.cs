@@ -24,4 +24,13 @@ public enum DepositType
 
     [EnumMember(Value = "40c")]
     FortyCents = 5,
+
+    [EnumMember(Value = "60c")]
+    SixtyCents = 6,
+
+    [EnumMember(Value = "120c")]
+    OneTwentyCents = 7,
+
+    [EnumMember(Value = "150c")]
+    OneFiftyCents = 8,
 }

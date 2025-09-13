@@ -12,6 +12,8 @@ public record InventorySearchModel
     public int PageIndex { get; init; } = 0;
 
     public int PageSize { get; init; } = 100;
+
+    public bool IncludeDiscontinued { get; init; } = true;
 }
 
 public class InventorySearchModelValidator : AbstractValidator<InventorySearchModel>
