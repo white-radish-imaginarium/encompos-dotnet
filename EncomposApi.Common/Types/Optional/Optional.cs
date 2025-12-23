@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EncomposApi.Types.Optional;
 
@@ -275,6 +276,16 @@ public interface IOptional
 		public void WhenPresent(Action<T> action)
 		{
 			if (_hasValue) action(_value);
+		}
+
+		/// <summary>
+		/// Evaluates a specified async action if a value is present.
+		/// </summary>
+		/// <param name="action">The async action to evaluate if the value is present.</param>
+		public Task WhenPresentAsync(Func<T, Task> action)
+		{
+			if (_hasValue) return action(_value);
+			return Task.CompletedTask;
 		}
 
 		/// <summary>

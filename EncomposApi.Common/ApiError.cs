@@ -104,6 +104,8 @@ public class ApiError : IActionResult
     }
 
     public static ApiError BadRequest(string reason = null) => new ApiError(400, reason);
+
+    public static ApiError Unauthorized(string reason = null) => new ApiError(401, reason);
     
     public static ApiError Forbidden(string reason = null) => new ApiError(403, reason);
     
