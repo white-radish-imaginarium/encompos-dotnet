@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # There is no solution file; the test project pulls in EncomposApi.Common
+      # via ProjectReference, so building it covers both.
+      - name: Restore
+        run: dotnet restore EncomposApi.Common.Tests/EncomposApi.Common.Tests.csproj
+
+      - name: Build
+        run: dotnet build EncomposApi.Common.Tests/EncomposApi.Common.Tests.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test EncomposApi.Common.Tests/EncomposApi.Common.Tests.csproj --no-build --configuration Release --verbosity normal

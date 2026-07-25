@@ -84,7 +84,10 @@ public class ApiError
     {
         Error = ex.GetType().Name;
         Reason = ex.Message;
-        StackTrace = ex.StackTrace
+
+        // StackTrace is null on an exception that was constructed but never thrown,
+        // which is legal for a caller building an error response directly.
+        StackTrace = ex.StackTrace?
             .Split(new[] { "\r\n" }, StringSplitOptions.None)
             .SelectMany(i => i.Split('\n'))
             .Select(i => i.Trim())

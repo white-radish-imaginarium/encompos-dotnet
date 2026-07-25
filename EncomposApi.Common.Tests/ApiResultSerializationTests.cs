@@ -90,6 +90,23 @@ public class ApiResultSerializationTests : TestBase
     }
 
     [Fact]
+    public void ApiError_Internal_HandlesNeverThrownException()
+    {
+        // Exception.StackTrace is null until the exception is thrown. Building an
+        // error response from a constructed exception is legal for library consumers
+        // and must not throw.
+        var apiError = ApiError.Internal(new InvalidOperationException("not thrown"));
+
+        Assert.Equal(500, apiError.Status);
+        Assert.Equal("InvalidOperationException", apiError.Error);
+        Assert.Equal("not thrown", apiError.Reason);
+        Assert.Null(apiError.StackTrace);
+        Assert.Equal(
+            "{\n  \"status\": 500,\n  \"error\": \"InvalidOperationException\",\n  \"reason\": \"not thrown\"\n}",
+            Serialize(apiError));
+    }
+
+    [Fact]
     public void ApiError_Internal_CapturesExceptionTypeAndMessage()
     {
         Exception thrown;
