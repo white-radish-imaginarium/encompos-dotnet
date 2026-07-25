@@ -1,27 +1,17 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
 
 namespace EncomposApi;
 
 [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
-public class ApiError : IActionResult
+public class ApiError
 {
     public ApiError() { }
-    
+
     public ApiError(int status, string reason = null)
     {
         Configure(status, reason);
-    }
-
-    public ApiError(ModelStateDictionary modelState)
-    {
-        var result = new BadRequestObjectResult(modelState);
-        Configure(result.StatusCode ?? 400);
-        Details = result.Value;
     }
 
     public int Status { get; set; } = 400;
@@ -112,18 +102,4 @@ public class ApiError : IActionResult
     public static ApiError NotFound(string reason = null) => new ApiError(404, reason);
     
     public static ApiError Internal(Exception ex) => new ApiError(500).CopyFrom(ex);
-
-    public static implicit operator JsonResult(ApiError err)
-    {
-        return new JsonResult(err)
-        {
-            StatusCode = err.Status
-        };
-    }
-
-    public Task ExecuteResultAsync(ActionContext context)
-    {
-        var jsonResult = (JsonResult)this;
-        return jsonResult.ExecuteResultAsync(context);
-    }
 }

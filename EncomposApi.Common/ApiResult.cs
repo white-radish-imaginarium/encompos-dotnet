@@ -1,14 +1,12 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace EncomposApi;
 
 [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
-public class ApiResult : IActionResult
+public class ApiResult
 {
     public ApiResult() { }
-    
+
     public ApiResult(int status, string reason = null)
     {
         Configure(status, reason);
@@ -45,18 +43,4 @@ public class ApiResult : IActionResult
     public static ApiResult Created(string message = null) => new (201, message);
     
     public static ApiResult Accepted(string message = null) => new (202, message);
-
-    public static implicit operator JsonResult(ApiResult res)
-    {
-        return new JsonResult(res)
-        {
-            StatusCode = res.Status
-        };
-    }
-
-    public Task ExecuteResultAsync(ActionContext context)
-    {
-        var jsonResult = (JsonResult)this;
-        return jsonResult.ExecuteResultAsync(context);
-    }
 }
