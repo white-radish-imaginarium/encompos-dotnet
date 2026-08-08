@@ -41,6 +41,22 @@ public class SalesQueryTests : TestBase
     }
 
     [Fact]
+    public void Validator_RejectsNullProductCodes()
+    {
+        var query = new SalesQuery
+        {
+            ProductCodes = null,
+            FromDate = new DateTime(2026, 7, 1),
+            ToDate = new DateTime(2026, 7, 1)
+        };
+
+        var result = new SalesQueryValidator().Validate(query);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(SalesQuery.ProductCodes));
+    }
+
+    [Fact]
     public void SalesLine_SerializesFixedSalesAndDiscountFields()
     {
         var line = new SalesLineModel

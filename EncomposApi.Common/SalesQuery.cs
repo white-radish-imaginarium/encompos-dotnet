@@ -17,7 +17,8 @@ public class SalesQueryValidator : AbstractValidator<SalesQuery>
     public SalesQueryValidator()
     {
         RuleFor(query => query.ProductCodes)
-            .NotEmpty()
+            .NotEmpty();
+        RuleFor(query => query.ProductCodes)
             .Must(productCodes => productCodes.Length <= 100)
             .When(query => query.ProductCodes is not null)
             .WithMessage("Too many product codes");
