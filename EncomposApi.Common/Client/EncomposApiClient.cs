@@ -275,6 +275,19 @@ public class EncomposApiClient
         throw await ApiClientException.CreateAsync(response, cancellationToken);
     }
 
+    public async Task<TypedJsonResult<SalesLineModel[]>> QuerySalesAsync(SalesQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"/api/sales/query";
+        using var content = Serializer.CreateHttpContent(query);
+        using var response = await _httpClient.PostAsync(requestUri, content, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var json = await response.Content.ReadAsJArrayAsync(cancellationToken);
+            return new TypedJsonResult<SalesLineModel[]>(json, response.StatusCode);
+        }
+        throw await ApiClientException.CreateAsync(response, cancellationToken);
+    }
+
     public async Task<TypedJsonResult<PurchaseOrderResult>> PutPurchaseOrderLinesAsync(decimal poNumber, JArray lines)
     {
         var requestUri = $"/api/po/{poNumber}/lines";
